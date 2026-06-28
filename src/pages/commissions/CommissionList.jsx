@@ -21,11 +21,12 @@ export default function CommissionList() {
     [accruals, mfr, status],
   )
 
+  // Tiles reflect the current filters (recalculate from the filtered rows).
   const tiles = useMemo(() => {
-    const earned = accruals.reduce((s, a) => s + a.earned, 0)
-    const settled = accruals.filter((a) => a.status === 'Settled').reduce((s, a) => s + a.earned, 0)
-    return { earned, settled, pending: earned - settled, count: accruals.length }
-  }, [accruals])
+    const earned = rows.reduce((s, a) => s + a.earned, 0)
+    const settled = rows.filter((a) => a.status === 'Settled').reduce((s, a) => s + a.earned, 0)
+    return { earned, settled, pending: earned - settled, count: rows.length }
+  }, [rows])
 
   return (
     <Layout title="Commissions" crumb="Module 3 · Earned on payment">

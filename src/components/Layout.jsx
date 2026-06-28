@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { APP_NAME, APP_TAGLINE, APP_VERSION, APP_STAGE, VENDOR, BUILD_DATE } from '../lib/version.js'
 
-export default function Layout({ title, crumb, actions, children }) {
+export default function Layout({ title, crumb, actions, wide, children }) {
   return (
     <div className="app">
       <aside className="sidebar">
@@ -43,7 +43,7 @@ export default function Layout({ title, crumb, actions, children }) {
           </div>
           <div className="flex">{actions}</div>
         </header>
-        <main className="content">{children}</main>
+        <main className={`content${wide ? ' wide' : ''}`}>{children}</main>
         <footer className="footer">
           <span>{APP_NAME} · v{APP_VERSION} ({APP_STAGE}) · {BUILD_DATE}</span>
           <span className="footnote">Prototype by {VENDOR}</span>

@@ -51,6 +51,7 @@ export default function CommissionList() {
   return (
     <Layout
       title="Commissions"
+      wide
       actions={
         selectedIds.length > 0 ? (
           <button className="btn btn-primary" onClick={() => setSettleOpen(true)}>
@@ -103,13 +104,10 @@ export default function CommissionList() {
                 />
               </th>
               <th>Commission</th>
-              <th>Date</th>
-              <th>From manufacturer</th>
-              <th>Invoice</th>
-              <th>Order</th>
+              <th>From → To</th>
+              <th>Source chain</th>
               <th className="right">Earned</th>
-              <th>Settlement</th>
-              <th>Status</th>
+              <th>Status &amp; settlement</th>
             </tr>
           </thead>
           <tbody>
@@ -119,19 +117,34 @@ export default function CommissionList() {
                   {a.status === 'Earned' ? (
                     <input type="checkbox" style={{ width: 'auto' }} checked={!!selected[a.id]} onChange={() => toggle(a.id)} />
                   ) : (
-                    <span className="muted">✓</span>
+                    <span className="muted" title="Settled">✓</span>
                   )}
                 </td>
-                <td className="mono tag-link">{a.id}</td>
-                <td className="muted">{fmtDate(a.date)}</td>
-                <td>{manufacturerName(a.manufacturerId)}</td>
-                <td className="mono">{a.invoiceId}</td>
-                <td className="mono">{a.orderId}</td>
-                <td className="num"><strong>{money2(a.earned)}</strong></td>
-                <td className="muted small">
-                  {a.status === 'Settled' ? `${fmtDate(a.settlement?.date)} · ${a.settlement?.reference || '—'}` : '—'}
+                <td>
+                  <div className="cell-main mono tag-link">{a.id}</div>
+                  <div className="cell-sub">{fmtDate(a.date)}</div>
                 </td>
-                <td><StatusBadge status={a.status} /></td>
+                <td>
+                  <div className="cell-main">{manufacturerName(a.manufacturerId)}</div>
+                  <div className="cell-sub">to {customerName(a.customerId)}</div>
+                </td>
+                <td>
+                  <div className="cell-sub" style={{ marginTop: 0 }}>
+                    <span className="mono">{a.paymentId}</span><span className="sep">·</span>
+                    <span className="mono">{a.invoiceId}</span><span className="sep">·</span>
+                    <span className="mono">{a.orderId}</span>
+                  </div>
+                  <div className="cell-sub">
+                    basis {money2(a.basisAmount)} · {a.commissionType === 'fixed' ? `fixed ₹${a.commissionValue.toLocaleString('en-IN')}` : `${a.commissionValue}%`}
+                  </div>
+                </td>
+                <td className="num"><strong style={{ fontSize: 15 }}>{money2(a.earned)}</strong></td>
+                <td>
+                  <StatusBadge status={a.status} />
+                  {a.status === 'Settled' && (
+                    <div className="cell-sub">{fmtDate(a.settlement?.date)} · {a.settlement?.reference || '—'}</div>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

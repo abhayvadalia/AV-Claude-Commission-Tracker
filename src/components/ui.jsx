@@ -49,6 +49,21 @@ export function Empty({ children }) {
   return <div className="empty">{children}</div>
 }
 
+export function Modal({ title, onClose, onSave, saveLabel = 'Save', canSave = true, children }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+        <div className="modal-head">{title}</div>
+        <div className="modal-body">{children}</div>
+        <div className="modal-foot">
+          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSave} onClick={onSave}>{saveLabel}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function CommissionTermLabel({ term }) {
   if (!term) return <span className="muted">—</span>
   return term.type === 'fixed' ? (

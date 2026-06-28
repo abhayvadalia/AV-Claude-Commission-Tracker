@@ -29,6 +29,23 @@ export function DataProvider({ children }) {
       addPayment: (payment) =>
         setState((s) => ({ ...s, payments: [...s.payments, payment] })),
 
+      // ---- Masters CRUD ----
+      item: (id) => byId(state.items, id),
+      addCustomer: (c) => setState((s) => ({ ...s, customers: [...s.customers, c] })),
+      updateCustomer: (id, patch) =>
+        setState((s) => ({ ...s, customers: s.customers.map((c) => (c.id === id ? { ...c, ...patch } : c)) })),
+      addManufacturer: (m) => setState((s) => ({ ...s, manufacturers: [...s.manufacturers, m] })),
+      updateManufacturer: (id, patch) =>
+        setState((s) => ({ ...s, manufacturers: s.manufacturers.map((m) => (m.id === id ? { ...m, ...patch } : m)) })),
+      addItem: (it) => setState((s) => ({ ...s, items: [...s.items, it] })),
+      updateItem: (id, patch) =>
+        setState((s) => ({ ...s, items: s.items.map((it) => (it.id === id ? { ...it, ...patch } : it)) })),
+
+      nextMasterId: (arr, prefix, pad = 2) => {
+        const nums = arr.map((x) => parseInt(String(x.id).replace(/\D/g, ''), 10)).filter((n) => !isNaN(n))
+        return `${prefix}${String((nums.length ? Math.max(...nums) : 0) + 1).padStart(pad, '0')}`
+      },
+
       nextOrderId: () => {
         const nums = state.orders.map((o) => parseInt(String(o.id).replace(/\D/g, ''), 10)).filter(Boolean)
         return `ORD-${Math.max(1000, ...nums) + 1}`

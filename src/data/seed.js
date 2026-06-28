@@ -160,6 +160,26 @@ export const seed = () => ({
     { id: 'PMT-5005', invoiceId: 'INV-K-9001', date: '2026-06-01', amount: 70000, mode: 'UPI', reference: 'UPI-4T1M8' },
   ],
 
+  // Items master — catalog of fabrics. New orders can pick an item to prefill
+  // the line (description, unit, rate, commission). Free-text entry is still allowed.
+  items: [
+    { id: 'IT-01', name: 'Banarasi Silk (premium)', unit: 'm', defaultRate: 220, defaultCommission: { type: 'percent', value: 4 } },
+    { id: 'IT-02', name: 'Dupion Silk', unit: 'm', defaultRate: 180, defaultCommission: { type: 'percent', value: 4 } },
+    { id: 'IT-03', name: 'Poly-Viscose Suiting', unit: 'm', defaultRate: 150, defaultCommission: { type: 'percent', value: 3 } },
+    { id: 'IT-04', name: 'Wool-blend Suiting', unit: 'm', defaultRate: 260, defaultCommission: { type: 'percent', value: 3 } },
+    { id: 'IT-05', name: 'Cotton Cambric', unit: 'm', defaultRate: 70, defaultCommission: { type: 'fixed', value: 3000 } },
+    { id: 'IT-06', name: 'Cotton Poplin', unit: 'm', defaultRate: 85, defaultCommission: { type: 'percent', value: 5 } },
+    { id: 'IT-07', name: 'Cotton Twill', unit: 'm', defaultRate: 110, defaultCommission: { type: 'percent', value: 5 } },
+    { id: 'IT-08', name: 'Chiffon', unit: 'm', defaultRate: 95, defaultCommission: { type: 'percent', value: 4 } },
+    { id: 'IT-09', name: 'Georgette', unit: 'm', defaultRate: 120, defaultCommission: { type: 'percent', value: 4 } },
+    { id: 'IT-10', name: 'Cotton Jersey Knit', unit: 'm', defaultRate: 130, defaultCommission: { type: 'fixed', value: 4500 } },
+    { id: 'IT-11', name: 'Pique Knit', unit: 'm', defaultRate: 140, defaultCommission: { type: 'percent', value: 3.5 } },
+    { id: 'IT-12', name: 'Interlock Knit', unit: 'm', defaultRate: 160, defaultCommission: { type: 'percent', value: 3.5 } },
+    { id: 'IT-13', name: 'Premium Worsted Suiting', unit: 'm', defaultRate: 420, defaultCommission: { type: 'percent', value: 3 } },
+    { id: 'IT-14', name: 'Silk Organza', unit: 'm', defaultRate: 160, defaultCommission: { type: 'percent', value: 4 } },
+    { id: 'IT-15', name: 'Cotton Voile', unit: 'm', defaultRate: 65, defaultCommission: { type: 'fixed', value: 2000 } },
+  ],
+
   // Commission accruals are computed from payments at runtime (see lib/commission.computeAccruals),
   // so recording a new payment automatically generates new accruals. Settlement status (the
   // manufacturer having paid the distributor) is tracked here as an override by accrual id.

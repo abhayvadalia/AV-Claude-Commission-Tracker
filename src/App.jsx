@@ -1,4 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import Dashboard from './pages/Dashboard.jsx'
+import Customers from './pages/masters/Customers.jsx'
+import Manufacturers from './pages/masters/Manufacturers.jsx'
+import Items from './pages/masters/Items.jsx'
 import OrderList from './pages/orders/OrderList.jsx'
 import NewOrder from './pages/orders/NewOrder.jsx'
 import OrderDetail from './pages/orders/OrderDetail.jsx'
@@ -11,7 +15,12 @@ import CommissionDetail from './pages/commissions/CommissionDetail.jsx'
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/orders" replace />} />
+      <Route path="/" element={<Dashboard />} />
+
+      <Route path="/masters" element={<Navigate to="/masters/customers" replace />} />
+      <Route path="/masters/customers" element={<Customers />} />
+      <Route path="/masters/manufacturers" element={<Manufacturers />} />
+      <Route path="/masters/items" element={<Items />} />
 
       <Route path="/orders" element={<OrderList />} />
       <Route path="/orders/new" element={<NewOrder />} />
@@ -24,7 +33,7 @@ export default function App() {
       <Route path="/commissions" element={<CommissionList />} />
       <Route path="/commissions/:id" element={<CommissionDetail />} />
 
-      <Route path="*" element={<Navigate to="/orders" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

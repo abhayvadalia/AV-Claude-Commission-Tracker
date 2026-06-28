@@ -162,6 +162,14 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 .tag-link { color: var(--primary); font-weight: 600; }
 .tag-link:hover { text-decoration: underline; }
 .linebox { border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; background: #fafbfc; }
+.ellip { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid-2, .detail-grid, .form-grid { grid-template-columns: 1fr; } }
+.dash-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.master-tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+.master-tabs a { padding: 9px 14px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.master-tabs a:hover { color: var(--text); }
+.master-tabs a.active { color: var(--primary); border-bottom-color: var(--primary); }
 .aging-pill { font-weight: 600; }
 
 /* Modal */

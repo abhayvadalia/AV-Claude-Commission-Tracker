@@ -6,7 +6,7 @@ import { lineAmount } from '../../lib/commission.js'
 import { money } from '../../lib/format.js'
 
 const blankLine = () => ({
-  desc: '', unit: 'm', qty: '', rate: '',
+  itemId: '', desc: '', unit: 'm', qty: '', rate: '',
   commissionType: 'percent', commissionValue: '',
 })
 
@@ -22,6 +22,20 @@ export default function NewOrder() {
   const setLine = (i, patch) => setLines((ls) => ls.map((l, j) => (j === i ? { ...l, ...patch } : l)))
   const addLine = () => setLines((ls) => [...ls, blankLine()])
   const removeLine = (i) => setLines((ls) => (ls.length > 1 ? ls.filter((_, j) => j !== i) : ls))
+
+  // Pick an item from the catalog to prefill the line.
+  const applyItem = (i, itemId) => {
+    const it = state.items.find((x) => x.id === itemId)
+    if (!it) { setLine(i, { itemId: '' }); return }
+    setLine(i, {
+      itemId,
+      desc: it.name,
+      unit: it.unit,
+      rate: String(it.defaultRate),
+      commissionType: it.defaultCommission?.type || 'percent',
+      commissionValue: String(it.defaultCommission?.value ?? ''),
+    })
+  }
 
   // Convenience: prefill commission from the selected vendor's default.
   const applyVendorDefault = (mid) => {
@@ -97,8 +111,15 @@ export default function NewOrder() {
           </div>
           <div className="form-grid">
             <div className="field full">
+              <label className="lbl">Item from catalog <span className="muted small">(optional — prefills the line)</span></label>
+              <select value={l.itemId || ''} onChange={(e) => applyItem(i, e.target.value)}>
+                <option value="">— Free text / custom —</option>
+                {state.items.map((it) => <option key={it.id} value={it.id}>{it.name} · {money(it.defaultRate)}/{it.unit}</option>)}
+              </select>
+            </div>
+            <div className="field full">
               <label className="lbl">Fabric description</label>
-              <input value={l.desc} placeholder="e.g. Banarasi Silk" onChange={(e) => setLine(i, { desc: e.target.value })} />
+              <input value={l.desc} placeholder="e.g. Banarasi Silk" onChange={(e) => setLine(i, { desc: e.target.value, itemId: '' })} />
             </div>
             <div className="field">
               <label className="lbl">Quantity</label>

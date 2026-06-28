@@ -9,6 +9,9 @@ export default function Layout({ title, crumb, actions, children }) {
           <small>Distributor console · v0.1</small>
         </div>
         <nav className="nav">
+          <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
+            📊 Dashboard
+          </NavLink>
           <div className="nav-section">Modules</div>
           <NavLink to="/orders" className={({ isActive }) => (isActive ? 'active' : '')}>
             📦 Orders
@@ -18,6 +21,16 @@ export default function Layout({ title, crumb, actions, children }) {
           </NavLink>
           <NavLink to="/commissions" className={({ isActive }) => (isActive ? 'active' : '')}>
             💰 Commissions
+          </NavLink>
+          <div className="nav-section">Masters</div>
+          <NavLink to="/masters/customers" className={({ isActive }) => (isActive ? 'active' : '')}>
+            👤 Customers
+          </NavLink>
+          <NavLink to="/masters/manufacturers" className={({ isActive }) => (isActive ? 'active' : '')}>
+            🏭 Manufacturers
+          </NavLink>
+          <NavLink to="/masters/items" className={({ isActive }) => (isActive ? 'active' : '')}>
+            🧵 Items
           </NavLink>
         </nav>
       </aside>

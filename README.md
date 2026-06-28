@@ -13,6 +13,20 @@ npm run dev      # opens http://localhost:5173
 
 Build a static version with `npm run build` (output in `dist/`), preview with `npm run preview`.
 
+## Dashboard
+
+The landing screen (`/`) gives an at-a-glance overview: KPI tiles (total/open orders,
+outstanding, overdue, commission earned and pending settlement), a commission-by-manufacturer
+bar chart, a collection-status donut, an outstanding-by-aging chart, and two alert lists —
+top overdue invoices and recent payments. Charts are dependency-free inline SVG.
+
+## Masters
+
+Reference data under `/masters`, with tabs for **Customers**, **Manufacturers** and **Items**.
+Each supports view, add and edit. Customers carry credit terms (driving due dates/aging);
+manufacturers carry a default commission; the **Items** catalog holds fabric name, unit,
+default rate and default commission, and can be picked in the New Order form to prefill a line.
+
 ## The three modules
 
 **Orders** — list (filter by status, search), detail (header, line items with per-line

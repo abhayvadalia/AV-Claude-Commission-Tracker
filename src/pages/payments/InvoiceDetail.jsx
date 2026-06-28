@@ -1,0 +1,208 @@
+import { useState } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import Layout from '../../components/Layout.jsx'
+import { StatusBadge, AgingBadge, KV, Empty, CommissionTermLabel } from '../../components/ui.jsx'
+import { useData } from '../../store/DataContext.jsx'
+import {
+  byId, invoiceAmount, invoicePosition, agingDays, agingBucket, ordersForInvoice,
+} from '../../lib/commission.js'
+import { money, money2, fmtDate } from '../../lib/format.js'
+
+export default function InvoiceDetail() {
+  const { id } = useParams()
+  const nav = useNavigate()
+  const { state, manufacturerName, customerName, addPayment, nextPaymentId, accruals } = useData()
+  const inv = byId(state.invoices, id)
+
+  const [modal, setModal] = useState(false)
+  const [payAmt, setPayAmt] = useState('')
+  const [payDate, setPayDate] = useState('2026-06-28')
+  const [payMode, setPayMode] = useState('Bank transfer')
+  const [payRef, setPayRef] = useState('')
+
+  if (!inv) return <Layout title="Invoice not found"><Empty>No invoice "{id}".</Empty></Layout>
+
+  const pos = invoicePosition(state, inv)
+  const days = agingDays(inv, pos.balance)
+  const bucket = agingBucket(days, pos.balance)
+  const orders = ordersForInvoice(state, inv)
+  const payments = state.payments.filter((p) => p.invoiceId === inv.id)
+  const invAccruals = accruals.filter((a) => a.invoiceId === inv.id)
+
+  const openModal = () => {
+    setPayAmt(String(pos.balance))
+    setPayRef('')
+    setModal(true)
+  }
+
+  const record = () => {
+    const amt = Number(payAmt)
+    if (!(amt > 0)) return
+    addPayment({
+      id: nextPaymentId(),
+      invoiceId: inv.id,
+      date: payDate,
+      amount: Math.min(amt, pos.balance),
+      mode: payMode,
+      reference: payRef || '—',
+    })
+    setModal(false)
+  }
+
+  return (
+    <Layout
+      title={inv.id}
+      crumb={<Link to="/invoices" className="tag-link">Payments</Link>}
+      actions={
+        <>
+          <button className="btn" onClick={() => nav('/invoices')}>← Back</button>
+          <button className="btn btn-primary" disabled={pos.balance <= 0} onClick={openModal}>
+            + Record Payment
+          </button>
+        </>
+      }
+    >
+      <div className="card card-pad mb">
+        <div className="detail-grid">
+          <KV k="Manufacturer (raised by)">{manufacturerName(inv.manufacturerId)}</KV>
+          <KV k="Customer (owes)">{customerName(inv.customerId)}</KV>
+          <KV k="Invoice date">{fmtDate(inv.date)}</KV>
+          <KV k="Due date">{fmtDate(inv.dueDate)}</KV>
+          <KV k="Invoice amount">{money(pos.amount)}</KV>
+          <KV k="Amount paid">{money(pos.paid)}</KV>
+          <KV k="Balance">{money(pos.balance)}</KV>
+          <KV k="Status"><StatusBadge status={pos.status} /></KV>
+          <KV k="Aging"><AgingBadge bucket={bucket} days={days} /></KV>
+        </div>
+      </div>
+
+      <div className="section-title">Linked orders <span className="muted small">(many-to-many)</span></div>
+      <div className="card mb">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Order line billed</th>
+              <th>Commission term</th>
+              <th className="right">Billed amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inv.lines.map((il, i) => {
+              const order = byId(state.orders, il.orderId)
+              const oline = order?.lines.find((l) => l.id === il.orderLineId)
+              return (
+                <tr key={i} className="clickable" onClick={() => nav(`/orders/${il.orderId}`)}>
+                  <td><span className="tag-link">{il.orderId}</span></td>
+                  <td>{oline?.desc || il.orderLineId}</td>
+                  <td><CommissionTermLabel term={oline?.commission} /></td>
+                  <td className="num">{money(il.amount)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="section-title">Payment history</div>
+      <div className="card mb">
+        {payments.length === 0 ? (
+          <Empty>No payments recorded yet. Recording a payment triggers commission accrual.</Empty>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Payment</th>
+                <th>Date</th>
+                <th>Mode</th>
+                <th>Reference</th>
+                <th className="right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((p) => (
+                <tr key={p.id}>
+                  <td className="mono">{p.id}</td>
+                  <td className="muted">{fmtDate(p.date)}</td>
+                  <td>{p.mode}</td>
+                  <td className="muted">{p.reference}</td>
+                  <td className="num">{money(p.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="section-title">Commission generated by this invoice's payments</div>
+      <div className="card">
+        {invAccruals.length === 0 ? (
+          <Empty>No commission accrued yet.</Empty>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Commission</th>
+                <th>Payment</th>
+                <th>Order line</th>
+                <th className="right">Basis</th>
+                <th>Term</th>
+                <th className="right">Earned</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invAccruals.map((a) => (
+                <tr key={a.id} className="clickable" onClick={() => nav(`/commissions/${encodeURIComponent(a.id)}`)}>
+                  <td className="mono tag-link">{a.id}</td>
+                  <td className="mono">{a.paymentId}</td>
+                  <td>{a.orderId}</td>
+                  <td className="num">{money2(a.basisAmount)}</td>
+                  <td>{a.commissionType === 'fixed' ? `Fixed ₹${a.commissionValue.toLocaleString('en-IN')}` : `${a.commissionValue}%`}</td>
+                  <td className="num">{money2(a.earned)}</td>
+                  <td><StatusBadge status={a.status} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {modal && (
+        <div className="modal-overlay" onClick={() => setModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">Record Payment · {inv.id}</div>
+            <div className="modal-body">
+              <p className="muted small mb">Outstanding balance: <strong style={{ color: 'var(--text)' }}>{money(pos.balance)}</strong>. A payment generates commission accruals proportionally across the linked order lines.</p>
+              <div className="field mb">
+                <label className="lbl">Amount</label>
+                <input type="number" value={payAmt} onChange={(e) => setPayAmt(e.target.value)} />
+              </div>
+              <div className="field mb">
+                <label className="lbl">Date</label>
+                <input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
+              </div>
+              <div className="field mb">
+                <label className="lbl">Mode</label>
+                <select value={payMode} onChange={(e) => setPayMode(e.target.value)}>
+                  <option>Bank transfer</option>
+                  <option>UPI</option>
+                  <option>Cheque</option>
+                  <option>Cash</option>
+                </select>
+              </div>
+              <div className="field">
+                <label className="lbl">Reference (optional)</label>
+                <input value={payRef} onChange={(e) => setPayRef(e.target.value)} placeholder="e.g. NEFT-1234" />
+              </div>
+            </div>
+            <div className="modal-foot">
+              <button className="btn" onClick={() => setModal(false)}>Cancel</button>
+              <button className="btn btn-primary" disabled={!(Number(payAmt) > 0)} onClick={record}>Record payment</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </Layout>
+  )
+}

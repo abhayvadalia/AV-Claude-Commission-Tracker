@@ -43,7 +43,6 @@ export default function OrderList() {
     neu: rows.filter((r) => r.st === 'New').length,
     partial: rows.filter((r) => r.st === 'Partially Fulfilled').length,
     completed: rows.filter((r) => r.st === 'Completed').length,
-    invoiced: rows.filter((r) => r.invCount > 0).length,
   }), [rows])
 
   const clear = () => { setStatus('All'); setMfr(''); setCust(''); setInvoiced('All'); setQ('') }
@@ -63,7 +62,6 @@ export default function OrderList() {
         <Tile label="New" value={k.neu} />
         <Tile label="Partially Fulfilled" value={k.partial} accent="amber" />
         <Tile label="Completed" value={k.completed} accent="green" />
-        <Tile label="Invoiced" value={k.invoiced} />
       </div>
 
       <div className="card">

@@ -41,21 +41,14 @@ export default function OrderList() {
       .sort((a, b) => (a.o.date < b.o.date ? 1 : -1))
   }, [state, status, mfr, cust, from, to, invoiced, q])
 
-  // KPIs recalculate from the filtered rows.
-  const k = useMemo(() => {
-    const count = rows.length
-    const value = rows.reduce((s, r) => s + r.total, 0)
-    const pending = rows.reduce((s, r) => s + r.pending, 0)
-    return {
-      count,
-      value,
-      pending,
-      fulfilled: value - pending,
-      open: rows.filter((r) => r.st !== 'Completed').length,
-      completed: rows.filter((r) => r.st === 'Completed').length,
-      avg: count ? value / count : 0,
-    }
-  }, [rows])
+  // KPIs (order counts) recalculate from the filtered rows.
+  const k = useMemo(() => ({
+    count: rows.length,
+    neu: rows.filter((r) => r.st === 'New').length,
+    partial: rows.filter((r) => r.st === 'Partially Fulfilled').length,
+    completed: rows.filter((r) => r.st === 'Completed').length,
+    invoiced: rows.filter((r) => r.invCount > 0).length,
+  }), [rows])
 
   const clear = () => { setStatus('All'); setMfr(''); setCust(''); setFrom(''); setTo(''); setInvoiced('All'); setQ('') }
   const active = status !== 'All' || mfr || cust || from || to || invoiced !== 'All' || q
@@ -70,13 +63,11 @@ export default function OrderList() {
       }
     >
       <div className="dash-tiles">
-        <Tile label="Orders" value={k.count} accent="primary" />
-        <Tile label="Open" value={k.open} accent="amber" />
+        <Tile label="Total Orders" value={k.count} accent="primary" />
+        <Tile label="New" value={k.neu} />
+        <Tile label="Partially Fulfilled" value={k.partial} accent="amber" />
         <Tile label="Completed" value={k.completed} accent="green" />
-        <Tile label="Total Value" value={money(k.value)} />
-        <Tile label="Fulfilled Value" value={money(k.fulfilled)} accent="green" />
-        <Tile label="Pending Value" value={money(k.pending)} accent="red" />
-        <Tile label="Avg Order Value" value={money(k.avg)} />
+        <Tile label="Invoiced" value={k.invoiced} />
       </div>
 
       <div className="card">

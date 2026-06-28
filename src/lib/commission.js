@@ -11,6 +11,11 @@ export const lineAmount = (line) => (Number(line.qty) || 0) * (Number(line.rate)
 
 export const orderTotal = (order) => order.lines.reduce((s, l) => s + lineAmount(l), 0)
 
+// Pending (un-fulfilled) quantity and value for a line / order.
+export const linePendingQty = (line) => Math.max(0, (Number(line.qty) || 0) - (Number(line.qtyFulfilled) || 0))
+export const linePendingAmount = (line) => linePendingQty(line) * (Number(line.rate) || 0)
+export const orderPendingAmount = (order) => order.lines.reduce((s, l) => s + linePendingAmount(l), 0)
+
 export const invoiceAmount = (inv) => inv.lines.reduce((s, l) => s + (Number(l.amount) || 0), 0)
 
 // ---- Order status (derived from line fulfilment) -------------------------

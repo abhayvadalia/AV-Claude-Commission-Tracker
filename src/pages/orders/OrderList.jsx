@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout.jsx'
 import { StatusBadge, Tile } from '../../components/ui.jsx'
 import { useData } from '../../store/DataContext.jsx'
-import { orderTotal, orderStatus, invoicesForOrder } from '../../lib/commission.js'
+import { orderTotal, orderStatus, invoicesForOrder, orderPendingAmount } from '../../lib/commission.js'
 import { money, fmtDate } from '../../lib/format.js'
 
 export default function OrderList() {
@@ -18,6 +18,7 @@ export default function OrderList() {
         o,
         st: orderStatus(o),
         total: orderTotal(o),
+        pending: orderPendingAmount(o),
         invCount: invoicesForOrder(state, o.id).length,
       }))
       .filter((r) => status === 'All' || r.st === status)
@@ -81,12 +82,13 @@ export default function OrderList() {
               <th>Manufacturer</th>
               <th className="right">Lines</th>
               <th className="right">Value</th>
+              <th className="right">Pending</th>
               <th className="right">Invoices</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ o, st, total, invCount }) => (
+            {rows.map(({ o, st, total, pending, invCount }) => (
               <tr key={o.id} className="clickable" onClick={() => nav(`/orders/${o.id}`)}>
                 <td><span className="tag-link">{o.id}</span></td>
                 <td className="muted">{fmtDate(o.date)}</td>
@@ -94,6 +96,9 @@ export default function OrderList() {
                 <td>{manufacturerName(o.manufacturerId)}</td>
                 <td className="num">{o.lines.length}</td>
                 <td className="num">{money(total)}</td>
+                <td className="num">
+                  {pending > 0 ? <strong style={{ color: 'var(--amber)' }}>{money(pending)}</strong> : <span className="muted">—</span>}
+                </td>
                 <td className="num">{invCount || '—'}</td>
                 <td><StatusBadge status={st} /></td>
               </tr>

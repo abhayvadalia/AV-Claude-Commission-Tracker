@@ -4,7 +4,7 @@ import { StatusBadge, KV, CommissionTermLabel, Empty } from '../../components/ui
 import { useData } from '../../store/DataContext.jsx'
 import {
   byId, lineAmount, orderTotal, orderStatus, orderLineStatus,
-  invoicesForOrder, invoicePosition,
+  invoicesForOrder, invoicePosition, linePendingQty, linePendingAmount, orderPendingAmount,
 } from '../../lib/commission.js'
 import { money, fmtDate } from '../../lib/format.js'
 
@@ -19,6 +19,9 @@ export default function OrderDetail() {
   const invoices = invoicesForOrder(state, order.id)
   const total = orderTotal(order)
   const m = manufacturer(order.manufacturerId)
+  const pendingTotal = orderPendingAmount(order)
+  const pendingLines = order.lines.filter((l) => linePendingQty(l) > 0)
+  const pendingUnits = pendingLines.reduce((s, l) => s + linePendingQty(l), 0)
 
   return (
     <Layout
@@ -37,6 +40,24 @@ export default function OrderDetail() {
         </div>
       </div>
 
+      {pendingTotal > 0 && (
+        <div className="card card-pad mb" style={{ borderLeft: '4px solid var(--amber)', background: 'var(--amber-soft)' }}>
+          <div className="flex between">
+            <div>
+              <strong style={{ color: 'var(--amber)' }}>Pending fulfilment</strong>
+              <div className="small muted">
+                {pendingLines.length} of {order.lines.length} line item(s) not fully delivered ·{' '}
+                {pendingUnits} unit(s) pending
+              </div>
+            </div>
+            <div className="right">
+              <div className="small muted">Pending value</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--amber)' }}>{money(pendingTotal)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="section-title">Line items</div>
       <div className="card">
         <table>
@@ -45,24 +66,36 @@ export default function OrderDetail() {
               <th>Fabric</th>
               <th className="right">Ordered</th>
               <th className="right">Fulfilled</th>
+              <th className="right">Pending</th>
               <th className="right">Rate</th>
               <th className="right">Line amount</th>
+              <th className="right">Pending value</th>
               <th>Commission</th>
               <th>Line status</th>
             </tr>
           </thead>
           <tbody>
-            {order.lines.map((l) => (
-              <tr key={l.id}>
-                <td>{l.desc}</td>
-                <td className="num">{l.qty} {l.unit}</td>
-                <td className="num">{l.qtyFulfilled} {l.unit}</td>
-                <td className="num">{money(l.rate)}</td>
-                <td className="num">{money(lineAmount(l))}</td>
-                <td><CommissionTermLabel term={l.commission} /></td>
-                <td><StatusBadge status={orderLineStatus(l)} /></td>
-              </tr>
-            ))}
+            {order.lines.map((l) => {
+              const pq = linePendingQty(l)
+              const pv = linePendingAmount(l)
+              return (
+                <tr key={l.id}>
+                  <td>{l.desc}</td>
+                  <td className="num">{l.qty} {l.unit}</td>
+                  <td className="num">{l.qtyFulfilled} {l.unit}</td>
+                  <td className="num">
+                    {pq > 0 ? <strong style={{ color: 'var(--amber)' }}>{pq} {l.unit}</strong> : <span className="muted">—</span>}
+                  </td>
+                  <td className="num">{money(l.rate)}</td>
+                  <td className="num">{money(lineAmount(l))}</td>
+                  <td className="num">
+                    {pv > 0 ? <strong style={{ color: 'var(--amber)' }}>{money(pv)}</strong> : <span className="muted">—</span>}
+                  </td>
+                  <td><CommissionTermLabel term={l.commission} /></td>
+                  <td><StatusBadge status={orderLineStatus(l)} /></td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

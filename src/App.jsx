@@ -6,6 +6,7 @@ import Items from './pages/masters/Items.jsx'
 import OrderList from './pages/orders/OrderList.jsx'
 import NewOrder from './pages/orders/NewOrder.jsx'
 import OrderDetail from './pages/orders/OrderDetail.jsx'
+import FulfilOrder from './pages/orders/FulfilOrder.jsx'
 import InvoiceList from './pages/payments/InvoiceList.jsx'
 import AddInvoice from './pages/payments/AddInvoice.jsx'
 import InvoiceDetail from './pages/payments/InvoiceDetail.jsx'
@@ -24,6 +25,7 @@ export default function App() {
 
       <Route path="/orders" element={<OrderList />} />
       <Route path="/orders/new" element={<NewOrder />} />
+      <Route path="/orders/:id/fulfil" element={<FulfilOrder />} />
       <Route path="/orders/:id" element={<OrderDetail />} />
 
       <Route path="/invoices" element={<InvoiceList />} />

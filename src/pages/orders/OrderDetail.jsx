@@ -27,7 +27,16 @@ export default function OrderDetail() {
     <Layout
       title={order.id}
       crumb={<Link to="/orders" className="tag-link">Orders</Link>}
-      actions={<button className="btn" onClick={() => nav('/orders')}>← Back</button>}
+      actions={
+        <>
+          <button className="btn" onClick={() => nav('/orders')}>← Back</button>
+          {orderStatus(order) !== 'Completed' && (
+            <button className="btn btn-primary" onClick={() => nav(`/orders/${order.id}/fulfil`)}>
+              Update Fulfilment
+            </button>
+          )}
+        </>
+      }
     >
       <div className="card card-pad mb">
         <div className="detail-grid">

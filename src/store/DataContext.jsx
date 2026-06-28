@@ -26,6 +26,27 @@ export function DataProvider({ children }) {
       addInvoice: (invoice) =>
         setState((s) => ({ ...s, invoices: [invoice, ...s.invoices] })),
 
+      // Atomically record newly-fulfilled quantities on an order AND raise the
+      // invoice that bills that newly-fulfilled value (architecture: fulfilment
+      // is invoiced, invoice lines reference the order lines, commission inherited).
+      fulfilOrder: ({ orderId, fulfilments, invoice }) =>
+        setState((s) => ({
+          ...s,
+          orders: s.orders.map((o) =>
+            o.id !== orderId
+              ? o
+              : {
+                  ...o,
+                  lines: o.lines.map((l) =>
+                    fulfilments[l.id]
+                      ? { ...l, qtyFulfilled: Math.min(l.qty, (Number(l.qtyFulfilled) || 0) + Number(fulfilments[l.id])) }
+                      : l,
+                  ),
+                },
+          ),
+          invoices: invoice ? [invoice, ...s.invoices] : s.invoices,
+        })),
+
       addPayment: (payment) =>
         setState((s) => ({ ...s, payments: [...s.payments, payment] })),
 

@@ -9,7 +9,13 @@ import { money, fmtDate } from '../../lib/format.js'
 export default function OrderList() {
   const nav = useNavigate()
   const { state, manufacturerName, customerName } = useData()
+
   const [status, setStatus] = useState('All')
+  const [mfr, setMfr] = useState('')
+  const [cust, setCust] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [invoiced, setInvoiced] = useState('All') // All | Invoiced | Not invoiced
   const [q, setQ] = useState('')
 
   const rows = useMemo(() => {
@@ -22,22 +28,37 @@ export default function OrderList() {
         invCount: invoicesForOrder(state, o.id).length,
       }))
       .filter((r) => status === 'All' || r.st === status)
+      .filter((r) => !mfr || r.o.manufacturerId === mfr)
+      .filter((r) => !cust || r.o.customerId === cust)
+      .filter((r) => !from || r.o.date >= from)
+      .filter((r) => !to || r.o.date <= to)
+      .filter((r) => invoiced === 'All' || (invoiced === 'Invoiced' ? r.invCount > 0 : r.invCount === 0))
       .filter((r) => {
         if (!q) return true
         const hay = `${r.o.id} ${customerName(r.o.customerId)} ${manufacturerName(r.o.manufacturerId)}`.toLowerCase()
         return hay.includes(q.toLowerCase())
       })
       .sort((a, b) => (a.o.date < b.o.date ? 1 : -1))
-  }, [state, status, q])
+  }, [state, status, mfr, cust, from, to, invoiced, q])
 
-  const totals = useMemo(() => {
-    const all = state.orders.map((o) => orderTotal(o))
+  // KPIs recalculate from the filtered rows.
+  const k = useMemo(() => {
+    const count = rows.length
+    const value = rows.reduce((s, r) => s + r.total, 0)
+    const pending = rows.reduce((s, r) => s + r.pending, 0)
     return {
-      count: state.orders.length,
-      value: all.reduce((s, v) => s + v, 0),
-      open: state.orders.filter((o) => orderStatus(o) !== 'Completed').length,
+      count,
+      value,
+      pending,
+      fulfilled: value - pending,
+      open: rows.filter((r) => r.st !== 'Completed').length,
+      completed: rows.filter((r) => r.st === 'Completed').length,
+      avg: count ? value / count : 0,
     }
-  }, [state])
+  }, [rows])
+
+  const clear = () => { setStatus('All'); setMfr(''); setCust(''); setFrom(''); setTo(''); setInvoiced('All'); setQ('') }
+  const active = status !== 'All' || mfr || cust || from || to || invoiced !== 'All' || q
 
   return (
     <Layout
@@ -48,10 +69,14 @@ export default function OrderList() {
         </button>
       }
     >
-      <div className="tiles">
-        <Tile label="Total Orders" value={totals.count} accent="primary" />
-        <Tile label="Open (not completed)" value={totals.open} accent="amber" />
-        <Tile label="Total Order Value" value={money(totals.value)} />
+      <div className="dash-tiles">
+        <Tile label="Orders" value={k.count} accent="primary" />
+        <Tile label="Open" value={k.open} accent="amber" />
+        <Tile label="Completed" value={k.completed} accent="green" />
+        <Tile label="Total Value" value={money(k.value)} />
+        <Tile label="Fulfilled Value" value={money(k.fulfilled)} accent="green" />
+        <Tile label="Pending Value" value={money(k.pending)} accent="red" />
+        <Tile label="Avg Order Value" value={money(k.avg)} />
       </div>
 
       <div className="card">
@@ -67,9 +92,44 @@ export default function OrderList() {
               </select>
             </div>
             <div className="field">
+              <label className="lbl">Manufacturer</label>
+              <select value={mfr} onChange={(e) => setMfr(e.target.value)}>
+                <option value="">All</option>
+                {state.manufacturers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label className="lbl">Customer</label>
+              <select value={cust} onChange={(e) => setCust(e.target.value)}>
+                <option value="">All</option>
+                {state.customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label className="lbl">Invoicing</label>
+              <select value={invoiced} onChange={(e) => setInvoiced(e.target.value)}>
+                <option>All</option>
+                <option>Invoiced</option>
+                <option>Not invoiced</option>
+              </select>
+            </div>
+            <div className="field">
+              <label className="lbl">Order date from</label>
+              <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            </div>
+            <div className="field">
+              <label className="lbl">to</label>
+              <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
+            <div className="field">
               <label className="lbl">Search</label>
               <input placeholder="Order, customer, manufacturer…" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
+            {active && (
+              <div className="field" style={{ justifyContent: 'flex-end' }}>
+                <button className="btn" onClick={clear}>Clear filters</button>
+              </div>
+            )}
           </div>
         </div>
         <table>
@@ -102,6 +162,9 @@ export default function OrderList() {
                 <td><StatusBadge status={st} /></td>
               </tr>
             ))}
+            {rows.length === 0 && (
+              <tr><td colSpan={9} className="empty">No orders match these filters.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

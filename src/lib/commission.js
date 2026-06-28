@@ -84,7 +84,7 @@ export const accrualId = (paymentId, orderLineId) => `${paymentId}#${orderLineId
 
 export const computeAccruals = (state) => {
   const accruals = []
-  const settled = new Set(state.settledAccrualIds || [])
+  const settlements = state.settlements || {}
 
   for (const pmt of state.payments) {
     const inv = byId(state.invoices, pmt.invoiceId)
@@ -110,6 +110,7 @@ export const computeAccruals = (state) => {
       }
 
       const id = accrualId(pmt.id, oline.id)
+      const settlement = settlements[id] || null
       accruals.push({
         id,
         paymentId: pmt.id,
@@ -122,7 +123,8 @@ export const computeAccruals = (state) => {
         commissionType: term.type,
         commissionValue: term.value,
         earned,
-        status: settled.has(id) ? 'Settled' : 'Earned',
+        status: settlement ? 'Settled' : 'Earned',
+        settlement,
         date: pmt.date,
       })
     }

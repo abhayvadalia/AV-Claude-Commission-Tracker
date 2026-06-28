@@ -50,6 +50,21 @@ export function DataProvider({ children }) {
       addPayment: (payment) =>
         setState((s) => ({ ...s, payments: [...s.payments, payment] })),
 
+      // ---- Commission settlement (manufacturer pays the distributor) ----
+      // detail = { date, reference }
+      settleCommissions: (ids, detail) =>
+        setState((s) => {
+          const next = { ...(s.settlements || {}) }
+          ids.forEach((id) => { next[id] = detail })
+          return { ...s, settlements: next }
+        }),
+      clearSettlement: (id) =>
+        setState((s) => {
+          const next = { ...(s.settlements || {}) }
+          delete next[id]
+          return { ...s, settlements: next }
+        }),
+
       // ---- Masters CRUD ----
       item: (id) => byId(state.items, id),
       addCustomer: (c) => setState((s) => ({ ...s, customers: [...s.customers, c] })),

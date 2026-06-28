@@ -181,7 +181,11 @@ export const seed = () => ({
   ],
 
   // Commission accruals are computed from payments at runtime (see lib/commission.computeAccruals),
-  // so recording a new payment automatically generates new accruals. Settlement status (the
-  // manufacturer having paid the distributor) is tracked here as an override by accrual id.
-  settledAccrualIds: ['PMT-5001#ORD-1001-L1', 'PMT-5001#ORD-1001-L2'],
+  // so recording a new payment automatically generates new accruals. Settlement (the manufacturer
+  // actually paying the distributor the earned commission) is tracked here as a map keyed by
+  // accrual id; presence => status "Settled", with the settlement date and reference.
+  settlements: {
+    'PMT-5001#ORD-1001-L1': { date: '2026-05-10', reference: 'SETL-SURAT-04' },
+    'PMT-5001#ORD-1001-L2': { date: '2026-05-10', reference: 'SETL-SURAT-04' },
+  },
 })

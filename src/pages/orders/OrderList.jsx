@@ -42,7 +42,6 @@ export default function OrderList() {
   return (
     <Layout
       title="Orders"
-      crumb="Module 1"
       actions={
         <button className="btn btn-primary" onClick={() => nav('/orders/new')}>
           + New Order

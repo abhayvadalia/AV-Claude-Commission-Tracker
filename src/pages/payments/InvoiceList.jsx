@@ -80,7 +80,6 @@ export default function InvoiceList() {
   return (
     <Layout
       title="Payments"
-      crumb="Module 2 · Invoices & Receipts"
       actions={
         <button className="btn btn-primary" onClick={() => nav('/invoices/new')}>
           + Add Invoice

@@ -51,7 +51,6 @@ export default function CommissionList() {
   return (
     <Layout
       title="Commissions"
-      crumb="Module 3 · Earned on payment"
       actions={
         selectedIds.length > 0 ? (
           <button className="btn btn-primary" onClick={() => setSettleOpen(true)}>

@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { APP_NAME, APP_VERSION, APP_STAGE, VENDOR, BUILD_DATE } from '../lib/version.js'
+import { APP_NAME, APP_TAGLINE, APP_VERSION, APP_STAGE, VENDOR, BUILD_DATE } from '../lib/version.js'
 
 export default function Layout({ title, crumb, actions, children }) {
   return (
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          Fabric Commission Tracker
-          <small>Distributor console · v0.1</small>
+          {APP_NAME}
+          <small>{APP_TAGLINE}</small>
         </div>
         <nav className="nav">
           <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>

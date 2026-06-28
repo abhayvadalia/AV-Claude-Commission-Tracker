@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { APP_NAME, APP_VERSION, APP_STAGE, VENDOR, BUILD_DATE } from '../lib/version.js'
 
 export default function Layout({ title, crumb, actions, children }) {
   return (
@@ -43,6 +44,10 @@ export default function Layout({ title, crumb, actions, children }) {
           <div className="flex">{actions}</div>
         </header>
         <main className="content">{children}</main>
+        <footer className="footer">
+          <span>{APP_NAME} · v{APP_VERSION} ({APP_STAGE}) · {BUILD_DATE}</span>
+          <span className="footnote">Prototype by {VENDOR}</span>
+        </footer>
       </div>
     </div>
   )
